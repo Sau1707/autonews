@@ -22,17 +22,15 @@ class Seagate(Website):
         main_div = soup.find('div', class_='AT-body')
         main_div = main_div.find('div', class_='body-content')
         markdown = md(str(main_div))
-        print(markdown[600:800])
-        with open('test.md', 'w', encoding='utf-8') as f:
-            # f.write(ftfy.fix_text(markdown))
-            # f.write(markdown)
-            for incorrect, correct in self.replacements.items():
+
+        for incorrect, correct in self.replacements.items():
                 markdown = markdown.replace(incorrect, correct)
 
-            pattern = r'(?<! )\[[^\]]*\]\([^\)]*\)'
-            markdown = re.sub(pattern, r' \g<0>', markdown)
-            f.write(markdown)
-
+        pattern = r'(?<! )\[[^\]]*\]\([^\)]*\)'
+        markdown = re.sub(pattern, r' \g<0>', markdown)
+        
+        return markdown
+    
     def get_news(self) -> list[News]:
         headers = {'Accept-Language': 'en'}
         response = requests.get(self.url, headers=headers)
@@ -40,16 +38,12 @@ class Seagate(Website):
 
         cards = soup.find_all('li', class_='CardLayout-card')
         news = []
-        for card in cards:
+        for card in cards[1:4]:
             title = card.find('a', class_='card-title').text.strip()
             subtitle = card.find('p', class_='card-body').text.strip()
             image = "https://www.seagate.com" + card.find('img')['src']
             url = "https://www.seagate.com" + card.find('a', class_='card-title')['href']
 
-            self.get_single_news(url)
-            break
-
-
-            news.append(News(title=title, subtitle=subtitle, image=image, url=url))
+            news.append(News(title=title, subtitle=subtitle, image=image, url=url, content=self.get_single_news(url), date="today"))
 
         return news

@@ -1,12 +1,12 @@
 import os
-import importlib
 import inspect
+import importlib
 from src.base import Website, News
 
 
 class AutoCall:
     @staticmethod
-    def load_all_news():
+    def load_all_news() -> list[News]:
         """Load all websites and execute their main function."""
 
         path = os.path.join("src", "websites")
@@ -23,6 +23,9 @@ class AutoCall:
                 if inspect.isclass(obj) and issubclass(obj, Website) and obj != Website:
                     classes.append(obj)
 
+        news = []
         for cls in classes:
-            instance = cls()
-            instance.get_news()
+            instance: Website = cls()
+            news.extend(instance.get_news())
+
+        return news
